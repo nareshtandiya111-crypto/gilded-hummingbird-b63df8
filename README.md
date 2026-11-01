@@ -49,3 +49,16 @@ Security notes:
 - Never put a Supabase `service_role` or secret key in the browser.
 - Use a strong password (at least 8 characters). Configure Supabase email sending/SMTP for reliable production delivery; default email service may have limits.
 - This starter UI is not a full production-ready system. Role-based authorization and admin/agent access must be enforced with database policies/server-side checks.
+
+
+## Login repair notes
+- The login now checks the signed-in user's `profiles.role` against the selected login type and displays useful errors instead of silently routing by the dropdown.
+- Run the updated `supabase/schema.sql` in Supabase SQL Editor. It creates/backfills profiles for Auth users; new accounts default to `customer`.
+- To grant Admin to an existing Auth user, run in Supabase SQL Editor after replacing the email:
+  ```sql
+  update public.profiles
+  set role = 'admin'
+  where id = (select id from auth.users where email = 'YOUR_ADMIN_EMAIL');
+  ```
+- To grant Agent after approval, use the same query with `role = 'agent'` and the approved agent's email. The current agent application form only submits an application; it does not create an Auth login account.
+- Never make a user Admin/Agent based only on a browser dropdown. The role must be set in the database by a trusted admin process.
